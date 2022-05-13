@@ -1,5 +1,11 @@
+# TO DO:
+# functia de verificare pipe uri 
+# celelalte poze
+# animatie 
+
 import pygame
 import sys
+import os
 from pygame.locals import *
 import random
 
@@ -11,6 +17,8 @@ WHITE = (255,255,255)
 RED = (255,0,0)
 GREEN = (0,255,0)
 BLACK = (0,0,0)
+BLUE = (81, 117, 161)
+ORANGE = (241, 168, 42)
 
 # window dimensions  
 WIDTH =  1280
@@ -69,9 +77,9 @@ class square:
     
     def draw(self):
         if self.isSelected():    
-            pygame.draw.rect(self.game.window, RED, [[self.x, self.y], [square_lat, square_lat]], 2)
+            pygame.draw.rect(self.game.window, ORANGE, [[self.x, self.y], [square_lat, square_lat]], 2)
         else:
-            pygame.draw.rect(self.game.window, WHITE, [[self.x, self.y], [square_lat, square_lat]], 2)
+            pygame.draw.rect(self.game.window, BLUE, [[self.x, self.y], [square_lat, square_lat]], 2)
 
         #PRESUPUN CA AICI AR TREBUI DESENATA SI POZA CU PIPE URI
         # if self.type == 0:
@@ -89,24 +97,53 @@ class square:
         
 
 class PipeTube(square):
-    def __init__(self, game, x, y, selected = 0):
+    def __init__(self, game, x, y, direction, selected = 0):
         super().__init__(game, x, y, selected)
+        self.direction = direction
 
     # NU APAR POZELE
     # TREBUIE INSERATA IMAGINEA ALTCUMVA
 
     def draw(self):
-        line = pygame.image.load(r'C:\Users\Radu Ana Maria\Desktop\PipeGameW-main\line_pipe_1.png')
-        self.window.blit(line,(x_start + square_lat, y_start))
+        tube = pygame.image.load(os.path.join('line_pipe_1.png'))
+        tube = self.rotatePipe(tube) 
+        self.game.window.blit(tube, (self.x, self.y))
 
+    def rotatePipe(self, tube):
+        if self.direction == 0:
+            tube = pygame.transform.rotate(tube, 90)
+        return tube
 
 class PipeCorner(square):
-    def __init__(self, game, x, y, selected = 0):
+    def __init__(self, game, x, y, direction, selected = 0):
         super().__init__(game, x, y, selected)
+        self.direction = direction
 
     def draw(self):
-        corner = pygame.image.load(r'C:\Users\Radu Ana Maria\Desktop\PipeGameW-main\corner_pipe_1.png')
-        self.window.blit(corner,(x_start,y_start))
+        corner = pygame.image.load(os.path.join('corner_pipe_1.png'))
+        corner = self.rotatePipe(corner)
+        self.game.window.blit(corner, (self.x, self.y))
+    
+    def rotatePipe(self, corner):
+        # if self.direction == 3:
+        #     corner = pygame.transform.rotate(corner, 90)
+        # elif self.direction == 4:
+        #     corner = pygame.transform.rotate(corner, 180)
+        # elif self.direction == 5:
+        #     corner = pygame.transform.rotate(corner, 270)
+        
+
+        # if self.direction == 2 or self.direction == 3 or self.direction == 4:
+        #         self.direction += 1
+        # elif self.direction == 5:
+        #         self.direction = 2
+        d = 2       
+        while d != self.direction: # 2 3 4 5 
+            corner = pygame.transform.rotate(corner, -90)
+            d += 1
+            if d > 5:
+                d = 2
+        return corner
 
 
 class Game:
@@ -121,7 +158,10 @@ class Game:
             aux = []
             x = x_start
             for j in range(10):
-                sq = square(self, x, y, pipe_type_initial[i][j])
+                if (i, j) in tube_list:
+                    sq = square(self, x, y, "tube")
+                else:
+                    sq = square(self, x, y, "corner")
                 aux.append(sq)
                 x += square_lat
             y += square_lat
@@ -134,16 +174,26 @@ class Game:
         pygame.display.update()
 
         # drawing the wallpaper
-        wallpaper = pygame.image.load(r'C:\Users\Radu Ana Maria\Desktop\PipeGameW-main\Fundal.png')
+        wallpaper = pygame.image.load(os.path.join('Fundal.png'))
         self.window.blit(wallpaper,(0,0))
 
         # drawing the outline of the grid
         pygame.draw.rect(self.window, WHITE, [[x_start, y_start], [grid_width, grid_height]], 2)
 
         # drawing the squares for the grid
+        i = 0
         for line in grid:
-            for sq in line:
+            j = 0
+            for sq in line:                
+                if sq.type == "tube":
+                    pipe = PipeTube(self, sq.x, sq.y, pipe_type_initial[i][j])
+                else:
+                    pipe = PipeCorner(self, sq.x, sq.y, pipe_type_initial[i][j])
+                pipe.draw()
                 sq.draw()
+                j += 1
+            i += 1
+        
         
         
     def run(self):
@@ -167,6 +217,8 @@ class Game:
                     self.moveRight(grid, i, j)
                 if event.key == K_LEFT:
                     self.moveLeft(grid, i, j)
+                if event.key == K_SPACE:
+                    self.rotate(grid, i, j)
     def moveUp(self, grid, i, j):
         if i == 0:
             grid[6][j].move(grid[i][j])
@@ -190,6 +242,23 @@ class Game:
             grid[i][0].move(grid[i][j])
         else:
             grid[i][j + 1].move(grid[i][j])
+
+    def rotate(self, grid, i, j):
+        if grid[i][j].type == "tube":
+            if pipe_type_initial[i][j] == 0:
+                pipe_type_initial[i][j] = 1
+            else:
+                pipe_type_initial[i][j] = 0
+            pipe = PipeTube(self, grid[i][j].x, grid[i][j].y, pipe_type_initial[i][j])
+        else:
+            if pipe_type_initial[i][j] == 2 or pipe_type_initial[i][j] == 3 or pipe_type_initial[i][j] == 4:
+                pipe_type_initial[i][j] += 1
+            elif pipe_type_initial[i][j] == 5:
+                pipe_type_initial[i][j] = 2
+            pipe = PipeCorner(self, grid[i][j].x, grid[i][j].y, pipe_type_initial[i][j])  
+        pipe.draw()
+
+        
 
     def selected(self, grid):
         for i in range (7):
