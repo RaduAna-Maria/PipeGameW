@@ -1,7 +1,8 @@
 # TO DO:
-# functia de verificare pipe uri 
-# celelalte poze
+# functia de verificare pipe uri ✔
+# celelalte poze ✔
 # animatie 
+# sa mearga corect prin corner pipe
 
 import pygame
 import sys
@@ -81,28 +82,56 @@ class square:
         else:
             pygame.draw.rect(self.game.window, BLUE, [[self.x, self.y], [square_lat, square_lat]], 2)
 
-        #PRESUPUN CA AICI AR TREBUI DESENATA SI POZA CU PIPE URI
-        # if self.type == 0:
-        #     tube = PipeTube(self.game, self.x, self.y, self.s)
-        #     tube.draw()
-        # else:
-        #     pass
-
     def isSelected(self):
         return self.s
 
     def move(self, prev):
         self.s = 1
         prev.s = 0
-        
+    
+    def walkHorizontal(self, grid, start, stop):
+        walk1 = pygame.image.load(os.path.join('Walk1.jpg'))
+        walk1 = pygame.transform.scale(walk1, (30, 30))
+        walk2 = pygame.image.load(os.path.join('Walk2.jpg'))
+        walk2 = pygame.transform.scale(walk2, (30, 30))
+        turn = 0
+        for x in range (start, stop, 4): 
+            if turn % 2 == 0: 
+                self.game.draw(grid)
+                self.game.window.blit(walk1, (x, self.y + square_lat / 2 - 15))
+                pygame.display.update()
+                pygame.time.delay(10)
+            else:
+                self.game.draw(grid)
+                self.game.window.blit(walk2, (x, self.y + square_lat / 2 - 15))
+                pygame.display.update()
+                pygame.time.delay(10)
+            turn += 1
+
+    def walkVertical(self, grid, start, stop):
+        walk1 = pygame.image.load(os.path.join('Walk1.jpg'))
+        walk1 = pygame.transform.scale(walk1, (30, 30))
+        walk2 = pygame.image.load(os.path.join('Walk2.jpg'))
+        walk2 = pygame.transform.scale(walk2, (30, 30))
+        turn = 0
+        for y in range (start, stop, 4): 
+            if turn % 2 == 0: 
+                self.game.draw(grid)
+                self.game.window.blit(walk1, (self.x + square_lat / 2 - 15, y))
+                pygame.display.update()
+                pygame.time.delay(10)
+            else:
+                self.game.draw(grid)
+                self.game.window.blit(walk2, (self.x + square_lat / 2 - 15, y))
+                pygame.display.update()
+                pygame.time.delay(10)
+            turn += 1
+            
 
 class PipeTube(square):
     def __init__(self, game, x, y, direction, selected = 0):
         super().__init__(game, x, y, selected)
         self.direction = direction
-
-    # NU APAR POZELE
-    # TREBUIE INSERATA IMAGINEA ALTCUMVA
 
     def draw(self):
         tube = pygame.image.load(os.path.join('line_pipe_1.png'))
@@ -113,6 +142,12 @@ class PipeTube(square):
         if self.direction == 0:
             tube = pygame.transform.rotate(tube, 90)
         return tube
+    
+    def walk(self, grid):
+        if self.direction == 0:
+            self.walkHorizontal(grid, self.x, self.x + square_lat)
+        else: 
+            self.walkVertical(grid, self.y, self.y + square_lat)
 
 class PipeCorner(square):
     def __init__(self, game, x, y, direction, selected = 0):
@@ -125,26 +160,30 @@ class PipeCorner(square):
         self.game.window.blit(corner, (self.x, self.y))
     
     def rotatePipe(self, corner):
-        # if self.direction == 3:
-        #     corner = pygame.transform.rotate(corner, 90)
-        # elif self.direction == 4:
-        #     corner = pygame.transform.rotate(corner, 180)
-        # elif self.direction == 5:
-        #     corner = pygame.transform.rotate(corner, 270)
-        
-
-        # if self.direction == 2 or self.direction == 3 or self.direction == 4:
-        #         self.direction += 1
-        # elif self.direction == 5:
-        #         self.direction = 2
         d = 2       
-        while d != self.direction: # 2 3 4 5 
+        while d != self.direction: 
             corner = pygame.transform.rotate(corner, -90)
             d += 1
             if d > 5:
                 d = 2
         return corner
 
+
+    # Nu merge corect
+    def walk(self, grid):
+        if self.direction == 2:
+            self.walkVertical(grid, self.y, self.y + square_lat // 2)
+            self.walkHorizontal(grid, self.x + square_lat // 2, self.x + square_lat)
+        elif self.direction == 3:
+            self.walkVertical(grid, self.y + square_lat, self.y + square_lat // 2)
+            self.walkHorizontal(grid, self.x + square_lat // 2, self.x + square_lat)
+        elif self.direction == 4:
+            self.walkHorizontal(grid, self.x, self.x + square_lat // 2)
+            self.walkVertical(grid, self.y + square_lat // 2, self.y + square_lat)
+        else:
+            self.walkHorizontal(grid, self.x, self.x + square_lat // 2)
+            self.walkVertical(grid, self.y + square_lat // 2, self.y + square_lat)
+            
 
 class Game:
     def __init__(self):
@@ -199,9 +238,15 @@ class Game:
     def run(self):
         grid = self.gridSquare()
         grid[0][0].s = 1 
-        while True:
+        solve = self.isSolved()
+        
+        while solve:
             self.draw(grid)    
-            self.input(grid)        
+            self.input(grid)  
+            solve = self.isSolved()
+        self.walk(grid)
+        
+            
 
     def input(self, grid):
         for event in pygame.event.get():
@@ -258,13 +303,26 @@ class Game:
             pipe = PipeCorner(self, grid[i][j].x, grid[i][j].y, pipe_type_initial[i][j])  
         pipe.draw()
 
-        
+    def isSolved(self):
+        for (i, j, d) in correct_way:
+            if pipe_type_initial[i][j] != d:
+                return True
+        return False 
 
     def selected(self, grid):
         for i in range (7):
             for j in range(10):
                 if grid[i][j].isSelected():
                     return [i,j]
+    
+    def walk(self, grid):
+        for (i, j, d) in correct_way:
+            if d == 0 or d == 1:
+                pipe = PipeTube(self, grid[i][j].x, grid[i][j].y, d)
+            else:
+                pipe = PipeCorner(self, grid[i][j].x, grid[i][j].y, d)
+            pipe.walk(grid)
+            
 
 def main():
     gameInst = Game()
