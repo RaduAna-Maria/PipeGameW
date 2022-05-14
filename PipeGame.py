@@ -3,6 +3,8 @@
 # celelalte poze ✔
 # animatie 
 # sa mearga corect prin corner pipe
+# sunete ✔
+# iconita de la joc schimbata ✔
 
 import pygame
 import sys
@@ -10,6 +12,7 @@ import os
 from pygame.locals import *
 import random
 
+pygame.mixer.init()
 pygame.init()
 frame_rate = pygame.time.Clock()
 
@@ -48,7 +51,6 @@ tube_list = [(0,1), (0,3), (0,4), (0,6), (0,8),
 # 3 = corner right-down
 # 4 = corner down-left
 # 5 = corner left-up
-# DNK = a value that does not matter
 
 # matrix for the maze at the start of the game
 pipe_type_initial = []
@@ -168,7 +170,7 @@ class PipeCorner(square):
                 d = 2
         return corner
 
-
+    # e o problema si la square ul (5,7)
     # Nu merge corect
     def walk(self, grid):
         if self.direction == 2:
@@ -219,7 +221,7 @@ class Game:
         # drawing the outline of the grid
         pygame.draw.rect(self.window, WHITE, [[x_start, y_start], [grid_width, grid_height]], 2)
 
-        # drawing the squares for the grid
+        # drawing the squares and the pipes for the grid
         i = 0
         for line in grid:
             j = 0
@@ -236,6 +238,9 @@ class Game:
         
         
     def run(self):
+        icon = pygame.image.load(os.path.join('Icon.png'))
+        pygame.display.set_icon(icon)
+
         grid = self.gridSquare()
         grid[0][0].s = 1 
         solve = self.isSolved()
@@ -255,15 +260,26 @@ class Game:
             if event.type == KEYDOWN:
                 [i,j] = self.selected(grid)
                 if event.key == K_UP:
+                    self.music('select_02', 0.5)
                     self.moveUp(grid, i, j)
-                if event.key == K_DOWN:    
+                if event.key == K_DOWN:  
+                    self.music('select_02', 0.5)
                     self.moveDown(grid, i, j)
                 if event.key == K_RIGHT:
+                    self.music('select_02', 0.5)
                     self.moveRight(grid, i, j)
                 if event.key == K_LEFT:
+                    self.music('select_02', 0.5)
                     self.moveLeft(grid, i, j)
                 if event.key == K_SPACE:
+                    self.music('selrot_01', 0.7)
                     self.rotate(grid, i, j)
+
+    def music(self, sound, vol):
+        pygame.mixer.music.load(os.path.join(sound))
+        pygame.mixer.music.set_volume(vol)
+        pygame.mixer.music.play()
+
     def moveUp(self, grid, i, j):
         if i == 0:
             grid[6][j].move(grid[i][j])
