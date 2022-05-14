@@ -172,6 +172,12 @@ class PipeCorner(square):
 
     # e o problema si la square ul (5,7)
     # Nu merge corect
+    # cred ca trebuie sa se memoreze undeva de unde vine pentru a sti unde se duce
+    # directia de mers vertical/orizontal nu e mereu aceeasi pt pipe uri de acelasi fel
+    # ex printr-un tub vertical se poate merge si sus-jos dar si jos-sus
+    # ex (4,3) si (2,6) au ambele directia 3
+    # prin (4,3) merge dreapta-stanga apoi sus-jos
+    # prin (2,6) merge jos-sus apoi stanga dreapta
     def walk(self, grid):
         if self.direction == 2:
             self.walkVertical(grid, self.y, self.y + square_lat // 2)
