@@ -5,35 +5,22 @@
 # sa mearga corect prin corner pipe
 # sunete ✔
 # iconita de la joc schimbata ✔
+# animatii pentru functii de:
+# up ✔
+# down ✔
+# left ✔
+# right ✔
+# integrarea functiilor pentru clasele  PipeTube si PipeCorner
+
 
 import pygame
 import sys
 import os
 from pygame.locals import *
 import random
+from Square import *
+from Tube import *
 
-pygame.mixer.init()
-pygame.init()
-frame_rate = pygame.time.Clock()
-
-# colour variables
-WHITE = (255,255,255)
-RED = (255,0,0)
-GREEN = (0,255,0)
-BLACK = (0,0,0)
-BLUE = (81, 117, 161)
-ORANGE = (241, 168, 42)
-
-# window dimensions  
-WIDTH =  1280
-HEIGHT = 720
-
-# grid global variables
-square_lat = 80
-x_start = 256
-y_start = 72
-grid_width = 10 * square_lat
-grid_height = 7 * square_lat
 
 # list of tuples for positions of tube pipes in the matrix
 tube_list = [(0,1), (0,3), (0,4), (0,6), (0,8),
@@ -70,128 +57,9 @@ correct_way = [(0,0,4), (1,0,1), (2,0,2), (2,1,0), (2,2,0), (2,3,0), (2,4,4),
                (6,6,0), (6,7,5), (5,7,1), (4,7,4), (4,6,2), (3,6,1), (2,6,3),
                (2,7,0), (2,8,0), (2,9,4), (3,9,1), (4,9,1), (5,9,1), (6,9,2)]
 
-class square: 
-    def __init__(self, game, x, y, type, selected = 0):
-        self.game = game
-        self.x = x
-        self.y = y
-        self.s = selected
-        self.type = type
-    
-    def draw(self):
-        if self.isSelected():    
-            pygame.draw.rect(self.game.window, ORANGE, [[self.x, self.y], [square_lat, square_lat]], 2)
-        else:
-            pygame.draw.rect(self.game.window, BLUE, [[self.x, self.y], [square_lat, square_lat]], 2)
-
-    def isSelected(self):
-        return self.s
-
-    def move(self, prev):
-        self.s = 1
-        prev.s = 0
-    
-    def walkHorizontal(self, grid, start, stop):
-        walk1 = pygame.image.load(os.path.join('Walk1.jpg'))
-        walk1 = pygame.transform.scale(walk1, (30, 30))
-        walk2 = pygame.image.load(os.path.join('Walk2.jpg'))
-        walk2 = pygame.transform.scale(walk2, (30, 30))
-        turn = 0
-        for x in range (start, stop, 4): 
-            if turn % 2 == 0: 
-                self.game.draw(grid)
-                self.game.window.blit(walk1, (x, self.y + square_lat / 2 - 15))
-                pygame.display.update()
-                pygame.time.delay(10)
-            else:
-                self.game.draw(grid)
-                self.game.window.blit(walk2, (x, self.y + square_lat / 2 - 15))
-                pygame.display.update()
-                pygame.time.delay(10)
-            turn += 1
-
-    def walkVertical(self, grid, start, stop):
-        walk1 = pygame.image.load(os.path.join('Walk1.jpg'))
-        walk1 = pygame.transform.scale(walk1, (30, 30))
-        walk2 = pygame.image.load(os.path.join('Walk2.jpg'))
-        walk2 = pygame.transform.scale(walk2, (30, 30))
-        turn = 0
-        for y in range (start, stop, 4): 
-            if turn % 2 == 0: 
-                self.game.draw(grid)
-                self.game.window.blit(walk1, (self.x + square_lat / 2 - 15, y))
-                pygame.display.update()
-                pygame.time.delay(10)
-            else:
-                self.game.draw(grid)
-                self.game.window.blit(walk2, (self.x + square_lat / 2 - 15, y))
-                pygame.display.update()
-                pygame.time.delay(10)
-            turn += 1
-            
-
-class PipeTube(square):
-    def __init__(self, game, x, y, direction, selected = 0):
-        super().__init__(game, x, y, selected)
-        self.direction = direction
-
-    def draw(self):
-        tube = pygame.image.load(os.path.join('line_pipe_1.png'))
-        tube = self.rotatePipe(tube) 
-        self.game.window.blit(tube, (self.x, self.y))
-
-    def rotatePipe(self, tube):
-        if self.direction == 0:
-            tube = pygame.transform.rotate(tube, 90)
-        return tube
-    
-    def walk(self, grid):
-        if self.direction == 0:
-            self.walkHorizontal(grid, self.x, self.x + square_lat)
-        else: 
-            self.walkVertical(grid, self.y, self.y + square_lat)
-
-class PipeCorner(square):
-    def __init__(self, game, x, y, direction, selected = 0):
-        super().__init__(game, x, y, selected)
-        self.direction = direction
-
-    def draw(self):
-        corner = pygame.image.load(os.path.join('corner_pipe_1.png'))
-        corner = self.rotatePipe(corner)
-        self.game.window.blit(corner, (self.x, self.y))
-    
-    def rotatePipe(self, corner):
-        d = 2       
-        while d != self.direction: 
-            corner = pygame.transform.rotate(corner, -90)
-            d += 1
-            if d > 5:
-                d = 2
-        return corner
-
-    # e o problema si la square ul (5,7)
-    # Nu merge corect
-    # cred ca trebuie sa se memoreze undeva de unde vine pentru a sti unde se duce
-    # directia de mers vertical/orizontal nu e mereu aceeasi pt pipe uri de acelasi fel
-    # ex printr-un tub vertical se poate merge si sus-jos dar si jos-sus
-    # ex (4,3) si (2,6) au ambele directia 3
-    # prin (4,3) merge dreapta-stanga apoi sus-jos
-    # prin (2,6) merge jos-sus apoi stanga dreapta
-    def walk(self, grid):
-        if self.direction == 2:
-            self.walkVertical(grid, self.y, self.y + square_lat // 2)
-            self.walkHorizontal(grid, self.x + square_lat // 2, self.x + square_lat)
-        elif self.direction == 3:
-            self.walkVertical(grid, self.y + square_lat, self.y + square_lat // 2)
-            self.walkHorizontal(grid, self.x + square_lat // 2, self.x + square_lat)
-        elif self.direction == 4:
-            self.walkHorizontal(grid, self.x, self.x + square_lat // 2)
-            self.walkVertical(grid, self.y + square_lat // 2, self.y + square_lat)
-        else:
-            self.walkHorizontal(grid, self.x, self.x + square_lat // 2)
-            self.walkVertical(grid, self.y + square_lat // 2, self.y + square_lat)
-            
+def test():
+    for (i, j, d) in correct_way:
+        pipe_type_initial[i][j] = d
 
 class Game:
     def __init__(self):
@@ -255,7 +123,7 @@ class Game:
             self.draw(grid)    
             self.input(grid)  
             solve = self.isSolved()
-        self.walk(grid)
+        self.walkDirection(grid)
         
             
 
@@ -337,16 +205,34 @@ class Game:
                 if grid[i][j].isSelected():
                     return [i,j]
     
-    def walk(self, grid):
+    def walkDirection(self, grid):
+        prev = (0, 0)
         for (i, j, d) in correct_way:
             if d == 0 or d == 1:
                 pipe = PipeTube(self, grid[i][j].x, grid[i][j].y, d)
+                if prev[0] > i and d == 1: 
+                    pipe.walk(grid, "up")
+                elif prev[0] < i and d == 1:
+                    pipe.walk(grid, "down")
+                elif prev[1] > j and d == 0:
+                    pipe.walk(grid, "left")
+                elif prev[1] < j and d == 0:
+                    pipe.walk(grid, "right")
             else:
                 pipe = PipeCorner(self, grid[i][j].x, grid[i][j].y, d)
-            pipe.walk(grid)
+                if prev[0] > i and (d == 3 or d == 4):
+                    pipe.walk(grid, "up")
+                elif prev[1] > j and d == 2:
+                    pipe.walk(grid, "up")
+                elif prev[1] < j and d == 5:
+                    pipe.walk(grid, "up")
+                else:
+                    pipe.walk(grid, "down")
+            prev = (i, j)
             
 
 def main():
+    test()
     gameInst = Game()
     gameInst.run()
 
