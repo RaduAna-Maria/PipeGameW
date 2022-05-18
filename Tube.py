@@ -18,6 +18,7 @@ class PipeTube(square):
     def walk(self, grid, dir):
         if self.direction == 0 and dir == "right":
             self.walkRight(grid, self.x, self.x + square_lat, self.y + square_lat / 2 - image_height )
+            
         elif self.direction == 0 and dir == "left":
             self.walkLeft(grid, self.x + square_lat, self.x, self.y + square_lat / 2  - image_height)
         elif self.direction == 1 and dir == "up": 

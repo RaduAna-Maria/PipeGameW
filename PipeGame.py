@@ -1,18 +1,3 @@
-# TO DO:
-# functia de verificare pipe uri ✔
-# celelalte poze ✔
-# animatie 
-# sa mearga corect prin corner pipe
-# sunete ✔
-# iconita de la joc schimbata ✔
-# animatii pentru functii de:
-# up ✔
-# down ✔
-# left ✔
-# right ✔
-# integrarea functiilor pentru clasele  PipeTube si PipeCorner
-
-
 import pygame
 import sys
 import os
@@ -57,9 +42,9 @@ correct_way = [(0,0,4), (1,0,1), (2,0,2), (2,1,0), (2,2,0), (2,3,0), (2,4,4),
                (6,6,0), (6,7,5), (5,7,1), (4,7,4), (4,6,2), (3,6,1), (2,6,3),
                (2,7,0), (2,8,0), (2,9,4), (3,9,1), (4,9,1), (5,9,1), (6,9,2)]
 
-def test():
-    for (i, j, d) in correct_way:
-        pipe_type_initial[i][j] = d
+# def test():
+#     for (i, j, d) in correct_way:
+#         pipe_type_initial[i][j] = d
 
 class Game:
     def __init__(self):
@@ -86,7 +71,7 @@ class Game:
 
     def draw(self, grid):
         pygame.time.Clock().tick(60)
-        pygame.display.update()
+        pygame.display.update() 
 
         # drawing the wallpaper
         wallpaper = pygame.image.load(os.path.join('Fundal.png'))
@@ -95,6 +80,11 @@ class Game:
         # drawing the outline of the grid
         pygame.draw.rect(self.window, WHITE, [[x_start, y_start], [grid_width, grid_height]], 2)
 
+      
+        pipe_s = pygame.image.load(os.path.join("start-end1.png"))
+        self.window.blit(pipe_s, (x_start - 80, y_start))
+        pipe_f = pygame.image.load(os.path.join("start-end.png"))
+        self.window.blit(pipe_f, (x_start + grid_width, y_start + grid_height - 80))
         # drawing the squares and the pipes for the grid
         i = 0
         for line in grid:
@@ -109,7 +99,9 @@ class Game:
                 j += 1
             i += 1
         
-        
+        # drawing the robot 
+        robot = pygame.image.load(os.path.join("Robot_stricat.png"))
+        self.window.blit(robot, (1146, 512))
         
     def run(self):
         icon = pygame.image.load(os.path.join('Icon.png'))
@@ -124,6 +116,7 @@ class Game:
             self.input(grid)  
             solve = self.isSolved()
         self.walkDirection(grid)
+        self.Robot(grid)
         
             
 
@@ -229,10 +222,64 @@ class Game:
                 else:
                     pipe.walk(grid, "down")
             prev = (i, j)
-            
+
+    def Robot(self, grid):
+    
+        self.draw(grid)
+
+        # drawing the robot 
+        cloud1 = pygame.image.load(os.path.join('dust_cloud1.png'))
+        cloud2 = pygame.image.load(os.path.join('dust_cloud2.png'))
+        cloud3 = pygame.image.load(os.path.join('dust_cloud3.png'))
+        
+        turn = 0
+        for i in range(6):
+            if turn % 3 == 0: 
+                self.draw(grid)
+                self.window.blit(cloud1, (1160, 500))
+                self.window.blit(cloud2, (1100, 512))
+                self.window.blit(cloud3, (1310, 512))
+                pygame.display.update() 
+            elif turn % 3 == 1:
+                self.draw(grid)
+                self.window.blit(cloud2, (1160, 500))
+                self.window.blit(cloud3, (1100, 512))
+                self.window.blit(cloud1, (1310, 512))
+                pygame.display.update() 
+            else:
+                self.draw(grid)
+                self.window.blit(cloud3, (1160, 500))
+                self.window.blit(cloud2, (1310, 512))
+                self.window.blit(cloud1, (1100, 512))
+                pygame.display.update() 
+            turn += 1
+        
+        self.draw(grid)
+        robot = pygame.image.load(os.path.join("Robot_reparat.png"))
+        pygame.display.update()
+        W1 = pygame.image.load(os.path.join("dance1.png"))
+        W2 = pygame.image.load(os.path.join("dance2.png"))
+        self.window.blit(robot, (1146, 512))
+        turn = 0
+        self.music("Music.mp3", 0.7)
+        for i in range(80):
+            if turn % 2 == 0:
+                self.draw(grid)
+                self.window.blit(robot, (1146, 512))
+                self.window.blit(W1, (1210, 530))
+                pygame.display.update()
+                pygame.time.delay(10)
+            else:
+                self.draw(grid)
+                self.window.blit(robot, (1146, 512))
+                self.window.blit(W2, (1210, 530))
+                pygame.display.update()
+                pygame.time.delay(10)
+            turn += 1
+
+        pygame.time.delay(300)
 
 def main():
-    test()
     gameInst = Game()
     gameInst.run()
 

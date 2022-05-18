@@ -2,7 +2,7 @@ import os
 from PIL import Image
 
 # get image
-filepath = os.path.join('Walk', 'Vener_walk_up1.png')
+filepath = os.path.join('start-end.png')
 img = Image.open(filepath)
 
 # get width and height

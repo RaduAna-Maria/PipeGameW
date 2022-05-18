@@ -57,18 +57,15 @@ class square:
             if turn % 3 == 0: 
                 self.game.draw(grid)
                 self.game.window.blit(walk1, (x, y))
-                pygame.display.update()
-                pygame.time.delay(10)
+                pygame.display.update() 
             elif turn % 3 == 1:
                 self.game.draw(grid)
                 self.game.window.blit(walk2, (x, self.y + square_lat / 2  - image_height))
-                pygame.display.update()
-                pygame.time.delay(10)
+                pygame.display.update() 
             else:
                 self.game.draw(grid)
                 self.game.window.blit(walk3, (x, self.y + square_lat / 2  - image_height))
-                pygame.display.update()
-                pygame.time.delay(10)
+                pygame.display.update() 
             turn += 1
     
     def walkLeft(self, grid, start, stop, y):
@@ -80,18 +77,15 @@ class square:
             if turn % 3 == 0: 
                 self.game.draw(grid)
                 self.game.window.blit(walk1, (x, y))
-                pygame.display.update()
-                pygame.time.delay(10)
+                pygame.display.update() 
             elif turn % 3 == 1:
                 self.game.draw(grid)
                 self.game.window.blit(walk2, (x, y))
-                pygame.display.update()
-                pygame.time.delay(10)
+                pygame.display.update() 
             else:
                 self.game.draw(grid)
                 self.game.window.blit(walk3, (x, y))
-                pygame.display.update()
-                pygame.time.delay(10)
+                pygame.display.update() 
             turn += 1
 
     def walkUp(self, grid, start, stop, x):
@@ -103,18 +97,15 @@ class square:
             if turn % 3 == 0: 
                 self.game.draw(grid)
                 self.game.window.blit(walk1, (x, y))
-                pygame.display.update()
-                pygame.time.delay(10)
+                pygame.display.update() 
             elif turn % 3 == 1:
                 self.game.draw(grid)
                 self.game.window.blit(walk2, (x, y ))
-                pygame.display.update()
-                pygame.time.delay(10)
+                pygame.display.update() 
             else:
                 self.game.draw(grid)
                 self.game.window.blit(walk3, (x, y ))
-                pygame.display.update()
-                pygame.time.delay(10)
+                pygame.display.update() 
             turn += 1
             
     def walkDown(self, grid, start, stop, x):
@@ -122,20 +113,17 @@ class square:
         walk2 = pygame.image.load(os.path.join('Walk', 'Vener_walk_down2.png'))
         walk3 = pygame.image.load(os.path.join('Walk', 'Vener_walk_down3.png'))
         turn = 0
-        for y in range (start, stop, 4): 
+        for y in range(start, stop, 4): 
             if turn % 3 == 0: 
                 self.game.draw(grid)
                 self.game.window.blit(walk1, (x, y))
-                pygame.display.update()
-                pygame.time.delay(10)
+                pygame.display.update() 
             elif turn % 3 == 1:
                 self.game.draw(grid)
                 self.game.window.blit(walk2, (x, y))
-                pygame.display.update()
-                pygame.time.delay(10)
+                pygame.display.update() 
             else:
                 self.game.draw(grid)
                 self.game.window.blit(walk3, (x, y))
-                pygame.display.update()
-                pygame.time.delay(10)
+                pygame.display.update() 
             turn += 1
